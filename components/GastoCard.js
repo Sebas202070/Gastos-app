@@ -15,7 +15,7 @@ export default function GastoCard({ gasto }) {
     <div className="p-4 border rounded-lg shadow flex justify-between items-center">
       <div>
         <h2 className="text-xl font-semibold">{gasto.titulo}</h2>
-        <p className="text-sm text-gray-600">{new Date(gasto.fecha).toLocaleDateString()}</p>
+        <p className="text-sm text-gray-600">Vencimiento: {new Date(gasto.fecha).toLocaleDateString()}</p>
         <p className="text-lg font-bold">${gasto.monto.toFixed(2)}</p>
         <p className="text-sm">{gasto.categoria}</p>
         <span className={`text-xs px-2 py-1 rounded ${gasto.pagado ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
