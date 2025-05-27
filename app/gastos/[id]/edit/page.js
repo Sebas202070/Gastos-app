@@ -2,11 +2,10 @@ import GastoForm from "@/components/GastoForm";
 import { prisma } from "@/lib/prisma";
 
 export default async function EditGastoPage({ params }) {
-  // Accede directamente a params.id
-  const id = parseInt(params.id);
+  // Acceso directo y robusto a params.id
+  const id = Number(params.id); // Usamos Number() para ser consistentes
 
   // Verificación para asegurar que 'id' es un número válido.
-  // Esto es una buena práctica aunque Next.js resuelva params.id
   if (isNaN(id)) {
     return <p>ID inválido</p>;
   }
