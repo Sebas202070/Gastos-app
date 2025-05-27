@@ -23,6 +23,7 @@ export default function GastoCard({ gasto }) {
         </span>
       </div>
       <div className="flex gap-2">
+       
         <button onClick={() => router.push(`/gastos/${gasto.id}/edit`)} className="text-blue-500 hover:underline">Editar</button>
         <button onClick={eliminar} className="text-red-500 hover:underline">Eliminar</button>
       </div>

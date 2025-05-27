@@ -1,6 +1,8 @@
 // app/api/gastos/route.js
 import { prisma } from '@/lib/prisma'
 
+
+
 export async function POST(req) {
   const data = await req.json();
   const gasto = await prisma.gasto.create({

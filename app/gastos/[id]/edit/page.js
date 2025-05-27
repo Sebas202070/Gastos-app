@@ -1,13 +1,23 @@
-// app/gastos/[id]/edit/page.js
-import { prisma } from '@/lib/prisma';
-import GastoForm from '@/components/GastoForm';
+import GastoForm from "@/components/GastoForm";
+import { prisma } from "@/lib/prisma";
 
 export default async function EditGastoPage({ params }) {
+  // Accede directamente a params.id
+  const id = parseInt(params.id);
+
+  // Verificación para asegurar que 'id' es un número válido.
+  // Esto es una buena práctica aunque Next.js resuelva params.id
+  if (isNaN(id)) {
+    return <p>ID inválido</p>;
+  }
+
   const gasto = await prisma.gasto.findUnique({
-    where: { id: parseInt(params.id) },
+    where: { id },
   });
 
-  if (!gasto) return <p>Gasto no encontrado</p>;
+  if (!gasto) {
+    return <p>Gasto no encontrado</p>;
+  }
 
   return (
     <div className="max-w-xl mx-auto mt-10">
