@@ -1,21 +1,20 @@
 import GastoForm from "@/components/GastoForm";
 import { prisma } from "@/lib/prisma";
 
-// Aquí cambiamos el parámetro para que sea un objeto 'props' completo
-// y luego hacemos 'await props.params'
 export default async function EditGastoPage(props) {
-  // Accedemos a 'params' de forma explícita después de un 'await'
-  const { id } = await props.params;
+  const { id } = await props.params; // 'id' es ahora el ObjectId como String
 
-  const numericId = Number(id); // Convertimos la cadena 'id' a un número
+  // console.log('ID recibido:', id); // Puedes descomentar esto para verificar en la consola
 
-  // Verificación para asegurar que 'id' es un número válido.
-  if (isNaN(numericId)) {
-    return <p>ID inválido</p>;
-  }
+  // --- ELIMINA LAS SIGUIENTES LÍNEAS YA QUE NO SON NECESARIAS PARA MONGODB ---
+  // const numericId = Number(id);
+  // if (isNaN(numericId)) {
+  //   return <p>ID inválido</p>;
+  // }
+  // -------------------------------------------------------------------------
 
   const gasto = await prisma.gasto.findUnique({
-    where: { id: numericId },
+    where: { id: id }, // Prisma para MongoDB espera el ID como String
   });
 
   if (!gasto) {

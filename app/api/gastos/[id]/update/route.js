@@ -1,18 +1,15 @@
+
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
-// Aquí también cambiamos el parámetro para que sea un objeto 'props' completo
-// y luego hacemos 'await props.params'
 export async function POST(req, props) {
-  // Accedemos a 'params' de forma explícita después de un 'await'
-  const { id } = await props.params;
+  const { id } = await props.params; // 'id' es ahora el ObjectId como String
   const body = await req.json();
   const { titulo, descripcion, monto, fecha, categoria, pagado } = body;
 
   try {
     const gasto = await prisma.gasto.update({
-      // Asegúrate de que `id` sea un número para Prisma
-      where: { id: parseInt(id) },
+      where: { id: id }, // Asegúrate de que `id` se use directamente como String
       data: {
         titulo,
         descripcion,

@@ -1,18 +1,29 @@
+// prisma/schema.prisma
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite" // o cámbialo a "postgresql" si usas otra base
+  provider = "mongodb" // <--- The provider is correctly set to 'mongodb' now
   url      = env("DATABASE_URL")
+  // You don't need this comment about 'postgresql' here, it's misleading
+  // Also, "Añade el conector para Prisma Accelerate" is not needed here
+  // unless you specifically plan to use Accelerate.
+  // For basic MongoDB connection, this datasource block is complete.
 }
 
 model Gasto {
-  id          Int      @id @default(autoincrement())
-  titulo      String // ✅ agregado
-  descripcion String
+  // For MongoDB, the ID needs the @map("_id") and @db.ObjectId attributes
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  titulo      String
+  descripcion String? // <--- Added '?' to make it optional, matching your GastoForm
   monto       Float
-  fecha       DateTime @default(now())
+  fecha       DateTime
   categoria   String
   pagado      Boolean  @default(false)
+
+  // It's highly recommended to add createdAt and updatedAt for tracking
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
