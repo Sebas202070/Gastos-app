@@ -1,17 +1,21 @@
 import GastoForm from "@/components/GastoForm";
 import { prisma } from "@/lib/prisma";
 
-export default async function EditGastoPage({ params }) {
-  // Acceso directo y robusto a params.id
-  const id = Number(params.id); // Usamos Number() para ser consistentes
+// Aquí cambiamos el parámetro para que sea un objeto 'props' completo
+// y luego hacemos 'await props.params'
+export default async function EditGastoPage(props) {
+  // Accedemos a 'params' de forma explícita después de un 'await'
+  const { id } = await props.params;
+
+  const numericId = Number(id); // Convertimos la cadena 'id' a un número
 
   // Verificación para asegurar que 'id' es un número válido.
-  if (isNaN(id)) {
+  if (isNaN(numericId)) {
     return <p>ID inválido</p>;
   }
 
   const gasto = await prisma.gasto.findUnique({
-    where: { id },
+    where: { id: numericId },
   });
 
   if (!gasto) {
