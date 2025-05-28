@@ -1,30 +1,40 @@
+// app/gastos/[id]/edit/page.js
 import GastoForm from "@/components/GastoForm";
-import { prisma } from "@/lib/prisma";
+import connectDB from '@/lib/mongoose';
+import Gasto from '@/models/Gasto';
+import DeleteButton from '@/components/DeleteButton';
 
 export default async function EditGastoPage(props) {
-  const { id } = await props.params; // 'id' es ahora el ObjectId como String
+  const { id } = await props.params;
 
-  // console.log('ID recibido:', id); // Puedes descomentar esto para verificar en la consola
+  await connectDB();
 
-  // --- ELIMINA LAS SIGUIENTES LÍNEAS YA QUE NO SON NECESARIAS PARA MONGODB ---
-  // const numericId = Number(id);
-  // if (isNaN(numericId)) {
-  //   return <p>ID inválido</p>;
-  // }
-  // -------------------------------------------------------------------------
-
-  const gasto = await prisma.gasto.findUnique({
-    where: { id: id }, // Prisma para MongoDB espera el ID como String
-  });
+  // Obtenemos el gasto usando .lean() para un objeto JS más simple
+  const gasto = await Gasto.findById(id).lean();
 
   if (!gasto) {
-    return <p>Gasto no encontrado</p>;
+    return <p className="text-center text-red-500 mt-10">Gasto no encontrado</p>;
   }
 
+  // --- ¡ESTE ES EL CAMBIO CLAVE! ---
+  // Convertimos el objeto Mongoose (incluso si es .lean()) a una cadena JSON,
+  // y luego lo parseamos de nuevo a un objeto JavaScript completamente plano.
+  // Esto serializa correctamente los ObjectIds y Dates.
+  const serializedGasto = JSON.parse(JSON.stringify(gasto));
+
+  // Formateamos la fecha para el input HTML type="date"
+  // y aseguramos que el 'id' sea un string para el Client Component.
+  const formattedGasto = {
+    ...serializedGasto, // Usamos el objeto ya serializado
+    id: serializedGasto._id, // _id ya es un string después de JSON.stringify
+    fecha: new Date(serializedGasto.fecha).toISOString().split('T')[0], // Aseguramos el formato de fecha
+  };
+
   return (
-    <div className="max-w-xl mx-auto mt-10">
+    <div className="max-w-xl mx-auto mt-10 p-4">
       <h1 className="text-2xl font-bold mb-4">Editar Gasto</h1>
-      <GastoForm gasto={gasto} isEdit={true} />
+      <GastoForm gasto={formattedGasto} isEdit={true} />
+      <DeleteButton gastoId={formattedGasto.id} />
     </div>
   );
 }

@@ -4,13 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-   "build": "npx prisma db push && npx prisma generate && next build",
-  
+     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
-    "@prisma/client": "^6.8.2",
+    "mongoose": "^8.15.1",
     "next": "15.3.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
@@ -20,7 +19,6 @@
     "@tailwindcss/postcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.3.2",
-    "prisma": "^6.8.2",
     "tailwindcss": "^4"
   }
 }
