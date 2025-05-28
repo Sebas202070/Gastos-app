@@ -1,42 +1,32 @@
-// app/api/gastos/[id]/update/route.js
+// app/api/gastos/route.js
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongoose';
 import Gasto from '@/models/Gasto';
 import { revalidatePath } from 'next/cache'; // <-- ¡IMPORTA ESTO!
 
-export async function POST(req, props) {
+export async function POST(req) {
   await connectDB();
 
-  const { id } = await props.params;
   const body = await req.json();
   const { titulo, descripcion, monto, fecha, categoria, pagado } = body;
 
   try {
-    const gastoActualizado = await Gasto.findByIdAndUpdate(
-      id,
-      {
-        titulo,
-        descripcion,
-        monto: parseFloat(monto),
-        fecha: new Date(fecha),
-        categoria,
-        pagado,
-      },
-      { new: true } // Retorna el documento actualizado
-    );
+    const nuevoGasto = await Gasto.create({
+      titulo,
+      descripcion,
+      monto: parseFloat(monto),
+      fecha: new Date(fecha),
+      categoria,
+      pagado: pagado,
+    });
 
-    if (!gastoActualizado) {
-      return NextResponse.json({ error: "Gasto no encontrado." }, { status: 404 });
-    }
+    // --- ¡ESTO ES CLAVE! Revalida la ruta raíz después de crear ---
+    revalidatePath('/');
+    // -------------------------------------------------------------
 
-    // --- ¡ESTO ES CLAVE! Revalida la ruta donde se listan los gastos ---
-    revalidatePath('/'); // Revalida la caché de la ruta raíz (donde se listan los gastos)
-    // Si tu lista de gastos estuviera en '/gastos', usarías revalidatePath('/gastos');
-    // ------------------------------------------------------------------
-
-    return NextResponse.json(gastoActualizado, { status: 200 });
+    return NextResponse.json(nuevoGasto, { status: 201 });
   } catch (error) {
-    console.error("Error al actualizar gasto:", error);
-    return NextResponse.json({ error: "Error al actualizar el gasto", details: error.message }, { status: 500 });
+    console.error("Error al crear gasto:", error);
+    return NextResponse.json({ error: "Error al crear el gasto", details: error.message }, { status: 500 });
   }
 }
