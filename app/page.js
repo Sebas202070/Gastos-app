@@ -6,27 +6,38 @@ import Alertas from '@/components/Alertas'; // Asegúrate de que esta ruta sea c
 
 export default async function Home() {
   let gastos = [];
+  let totalGastos = 0;
+  let totalPendiente = 0; // Nueva variable para el total pendiente
+
   try {
     await connectDB(); // Conecta a la base de datos
     // Obtén los gastos, ordenados por fecha de forma descendente, y conviértelos a objetos planos
     gastos = await Gasto.find().sort({ fecha: -1 }).lean();
 
     // Mapea los gastos para asegurar que _id sea un string y la fecha sea un objeto Date
-    // Esto es crucial para que Alertas y el resto de la interfaz funcionen correctamente
     gastos = gastos.map(gasto => ({
       ...gasto,
-      _id: gasto._id.toString(), // Convierte ObjectId a string para usar como key y pasar a componentes cliente
-      fecha: new Date(gasto.fecha) // Asegura que la fecha sea un objeto Date para manipulaciones y comparaciones
+      _id: gasto._id.toString(), // Convierte ObjectId a string para usar como key
+      fecha: new Date(gasto.fecha) // Asegura que la fecha sea un objeto Date
     }));
+
+    // Calcula el total de todos los gastos
+    totalGastos = gastos.reduce((sum, gasto) => sum + gasto.monto, 0);
+
+    // Calcula el total de gastos pendientes (donde 'pagado' es false)
+    totalPendiente = gastos.reduce((sum, gasto) => {
+      if (!gasto.pagado) {
+        return sum + gasto.monto;
+      }
+      return sum;
+    }, 0);
 
   } catch (err) {
     console.error("Error cargando gastos:", err);
-    // Puedes aquí añadir una lógica para mostrar un mensaje de error en la UI si lo deseas
+    // Podrías añadir una lógica para mostrar un mensaje de error en la UI aquí
   }
 
   // --- Función auxiliar para formatear a pesos argentinos ---
-  // Esta función también está en Alertas.js. Para evitar duplicidad,
-  // podrías moverla a un archivo de utilidades (ej. lib/utils.js) y luego importarla.
   const formatArgentinianPeso = (amount) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -46,6 +57,23 @@ export default async function Home() {
         </Link>
       </div>
 
+      {/* --- Totales (General y Pendiente) --- */}
+      <div className="bg-white shadow-md rounded-lg p-4 mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="border-r md:border-r-0 md:border-b-0 pr-4 md:pr-0 md:pb-4">
+          <h2 className="text-xl font-bold text-center mb-2">Total Gastos</h2>
+          <p className="text-3xl font-extrabold text-center text-blue-600">
+            {formatArgentinianPeso(totalGastos)}
+          </p>
+        </div>
+        <div>
+          <h2 className="text-xl font-bold text-center mb-2">Total Pendiente</h2>
+          <p className="text-3xl font-extrabold text-center text-red-600">
+            {formatArgentinianPeso(totalPendiente)}
+          </p>
+        </div>
+      </div>
+      {/* ------------------------------------- */}
+
       {/* --- Componente de Alertas --- */}
       {/* Pasa la lista de gastos al componente Alertas para que pueda procesarlos */}
       <Alertas gastos={gastos} />
@@ -61,9 +89,7 @@ export default async function Home() {
                 <div>
                   <h2 className="text-lg font-semibold">{gasto.titulo}</h2>
                   <p className="text-gray-600">{gasto.descripcion}</p>
-                  {/* --- Formateo de Monto a Pesos Argentinos --- */}
                   <p className="text-gray-700">Monto: {formatArgentinianPeso(gasto.monto)}</p>
-                  {/* ------------------------------------------ */}
                   <p className="text-gray-700">Fecha: {gasto.fecha.toLocaleDateString('es-AR')}</p>
                   <p className="text-gray-700">Categoría: {gasto.categoria}</p>
                   <p className={`font-semibold ${gasto.pagado ? 'text-green-600' : 'text-red-600'}`}>
